@@ -1,8 +1,8 @@
 import validator from "validator";
-import { errorHandler } from "./../Utils/errorHandler";
-import User from "./../Models/userModel";
+import { errorHandler } from "./../Utils/errorHandler.js";
+import User from "./../Models/userModel.js";
 import bcrypt from "bcryptjs";
-import { generateToken } from "../Utils/generateToken";
+import { generateToken } from "../Utils/generateToken.js";
 
 export const signup = async (req, res, next) => {
   const { fullname, email, password } = req.body;
@@ -31,12 +31,13 @@ export const signup = async (req, res, next) => {
       minSymbols: 1,
       minNumbers: 1,
       minLowercase: 1,
+  
     })
   ) {
     return next(
       errorHandler(
         400,
-        "Password must be atleast 6 character length and it must contain atleast 1 lowercase, 1 number and 1 symbol."
+        "Password must be at least 6 character length and it must contain at least 1 lowercase,1 uppercase, 1 number and 1 symbol."
       )
     );
   }
