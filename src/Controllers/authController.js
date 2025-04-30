@@ -129,3 +129,11 @@ export const logout = async (req, res, next) => {
     next(error);
   }
 };
+
+export const checkAuth = (req, res, next) => {
+  try {
+  res.status(200).json({success: true, message: "User authenticated", userData: req.user})
+  } catch (error) {
+    next(error)
+  }
+}
