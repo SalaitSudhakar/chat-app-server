@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import connectDb from "./Database/databaseConfig.js";
 import authRoutes from "./Routes/authRoutes.js";
 import userRoutes from './Routes/userRoutes.js';
+import messageRoutes from './Routes/messageRoutes.js';
 
 dotenv.config();
 
@@ -29,7 +30,8 @@ app.get("/", (req, res) => {
 
 // App routes
 app.use("/api/auth", authRoutes);
-app.use("/api/user", userRoutes)
+app.use("/api/user", userRoutes);
+app.use('/api/message', messageRoutes)
 
 // Error Middleware
 app.use((error, req, res, next) => {
