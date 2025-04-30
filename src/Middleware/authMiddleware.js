@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
-import { errorHandler } from "../Utils/errorHandler";
-import User from "./../Models/userModel";
+import { errorHandler } from "../Utils/errorHandler.js";
+import User from "./../Models/userModel.js";
 
 dotenv.config();
 
