@@ -6,7 +6,7 @@ const upload = (folderName) => {
   const storage = new CloudinaryStorage({
     cloudinary,
     params: {
-      folder: folderName,
+      folder: `chat-app/${folderName}`,
       allowed_formats: ["jpg", "png", "jpeg"],
     },
   });

@@ -5,7 +5,7 @@ import upload from '../Config/multer.js';
 
 const route = express.Router();
 
-route.put("/update/profile-pic", authMiddleware, upload('chat-app/profiles').single("profilePic") updateProfilePic)
+route.put("/update/profile-pic", authMiddleware, upload('profiles').single("profilePic"), updateProfilePic)
 route.get("/users", authMiddleware, getUsers)
 
 export default route;
