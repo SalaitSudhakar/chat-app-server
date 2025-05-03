@@ -15,8 +15,8 @@ export const signup = async (req, res, next) => {
   }
 
   // Validate fullname
-  if (!validator.isAlpha(fullname.replace(/\s/g, ""))) {
-    return next(errorHandler(400, "Name can only contain strings and space"));
+  if (!validator.isAlphanumeric(fullname.replace(/\s/g, ""))) {
+    return next(errorHandler(400, "Name can only contain strings, number and space"));
   }
 
   //  Validate email
@@ -31,7 +31,6 @@ export const signup = async (req, res, next) => {
       minSymbols: 1,
       minNumbers: 1,
       minLowercase: 1,
-  
     })
   ) {
     return next(
@@ -132,8 +131,14 @@ export const logout = async (req, res, next) => {
 
 export const checkAuth = (req, res, next) => {
   try {
-  res.status(200).json({success: true, message: "User authenticated", userData: req.user})
+    res
+      .status(200)
+      .json({
+        success: true,
+        message: "User authenticated",
+        userData: req.user,
+      });
   } catch (error) {
-    next(error)
+    next(error);
   }
-}
+};
