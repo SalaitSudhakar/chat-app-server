@@ -58,20 +58,20 @@ export const signup = async (req, res, next) => {
       password: hashedPassword,
     });
 
-    // Generate token
-    generateToken(newUser._id, res);
-
     // Save newUser in the db
     await newUser.save();
 
+    // Generate token
+    generateToken(newUser._id, res);
+
+    /* Separate user details without password */
+    const { password: _, ...userData} = newUser._doc; 
+    
     // Send response with userDetails
     res.status(201).json({
       success: true,
       message: "User Registered successfully",
-      _id: newUser._id,
-      fullName: newUser.fullName,
-      email: newUser.email,
-      profilePic: newUser.profilePic,
+      userData
     });
   } catch (error) {
     next(error);
@@ -100,14 +100,14 @@ export const login = async (req, res, next) => {
 
     generateToken(user._id, res);
 
+    /* Separate user details without password */
+    const { password:_, ...userData } = user._doc;
+
     // Send response with userDetails
     res.status(200).json({
       success: true,
       message: "User Loggedin successfully",
-      _id: user._id,
-      fullName: user.fullName,
-      email: user.email,
-      profilePic: user.profilePic,
+      userData
     });
   } catch (error) {
     next(error);
