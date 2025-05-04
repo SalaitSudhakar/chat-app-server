@@ -52,6 +52,10 @@ export const updateProfile = async (req, res, next) => {
     if (req.body.email) {
       const email = req.body.email;
 
+      const isEmailExist = await User.find({ email });
+
+      if (isEmailExist) return next(errorHandler(400, "Email Already Exists. Please provide alternate email"))
+
       //  Validate email
       if (!validator.isEmail(email)) {
         return next(errorHandler(400, "Invalid email format"));
