@@ -52,7 +52,7 @@ export const updateProfile = async (req, res, next) => {
     if (req.body.email) {
       const email = req.body.email;
 
-      const isEmailExist = await User.find({ email });
+      const isEmailExist = await User.findOne({ email }).select("-password");
 
       if (isEmailExist) return next(errorHandler(400, "Email Already Exists. Please provide alternate email"))
 

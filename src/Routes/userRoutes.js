@@ -7,6 +7,6 @@ const route = express.Router();
 
 route.patch("/update/profile-pic", authMiddleware, upload('profiles').single("profilePic"), updateProfilePic)
 route.put("/update/profile", authMiddleware, updateProfile)
-route.get("/users", authMiddleware, getUsers)
+route.get("/get-users", authMiddleware, getUsers)
 
 export default route;

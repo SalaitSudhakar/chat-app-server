@@ -3,10 +3,13 @@ import Message from "./../Models/messageModel.js";
 
 export const getMessages = async (req, res, next) => {
   try {
+    // Receivers Id
     const { id: userToChatId } = req.params;
 
     if (!userToChatId)
       return next(errorHandler(400, "Id in params is missing"));
+
+    /* Sender Id */
     const myId = req.user._id;
 
     const messages = await Message.find({
