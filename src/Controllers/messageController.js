@@ -1,3 +1,4 @@
+import { getReceiverSocketId, io } from "../Config/socket.js";
 import { errorHandler } from "../Utils/errorHandler.js";
 import Message from "./../Models/messageModel.js";
 
@@ -34,12 +35,10 @@ export const sendMessage = async (req, res, next) => {
     const { text } = req.body;
 
     if (!text && !req.file) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message: "Message text or image is required.",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "Message text or image is required.",
+      });
     }
 
     const messageData = {
@@ -48,7 +47,7 @@ export const sendMessage = async (req, res, next) => {
     };
 
     if (req.file) {
-      messageData.image = req.file.path; 
+      messageData.image = req.file.path;
     }
 
     if (text) {
@@ -58,10 +57,15 @@ export const sendMessage = async (req, res, next) => {
     const newMessage = new Message(messageData);
     await newMessage.save();
 
+    /* Socket */
+    const receiverSocketId = getReceiverSocketId(receiverId);
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("newMessage", newMessage);
+    }
+
     res.status(200).json({
       success: true,
-      message: "Message Sent Successfully",
-      message: newMessage,
+      newMessage,
     });
   } catch (error) {
     next(error);

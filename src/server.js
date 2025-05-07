@@ -6,12 +6,12 @@ import connectDb from "./Database/databaseConfig.js";
 import authRoutes from "./Routes/authRoutes.js";
 import userRoutes from './Routes/userRoutes.js';
 import messageRoutes from './Routes/messageRoutes.js';
+import { seedDatabase } from "./Seeds/userSeeds.js";
+import { app, server } from "./Config/socket.js";
 
 dotenv.config();
 
 const PORT = process.env.PORT || 4000;
-
-const app = express();
 
 // only allow these origins
 const allowedOrigins = [process.env.FRONTEND_URL, "http://localhost:5173"];
@@ -50,7 +50,10 @@ app.use((error, req, res, next) => {
 // Connect the database
 connectDb();
 
+/* Call seed data */
+seedDatabase();
+
 // Start the server
-app.listen(PORT, (req, res) => {
+server.listen(PORT, (req, res) => {
   console.log("Server is started and running on the port.");
 });
