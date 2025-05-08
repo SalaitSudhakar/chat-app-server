@@ -107,6 +107,7 @@ const hashPassword = async (password) => {
 
 export const seedDatabase = async () => {
   try {
+    await connectDb();
     const existingUsers = await User.countDocuments();
 
     if (existingUsers <= 5) {
