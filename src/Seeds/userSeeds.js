@@ -8,94 +8,93 @@ config();
 const seedUsers = [
   // Female Users
   {
-    email: "kaviya.sundari@example.com",
-    fullname: "Kaviya Sundari",
+    email: "emma.clark@example.com",
+    fullname: "Emma Clark",
     password: "User/123",
     profilePic: "https://randomuser.me/api/portraits/women/10.jpg",
   },
   {
-    email: "meena.rani@example.com",
-    fullname: "Meena Rani",
+    email: "olivia.johnson@example.com",
+    fullname: "Olivia Johnson",
     password: "User/123",
     profilePic: "https://randomuser.me/api/portraits/women/11.jpg",
   },
   {
-    email: "nandhini.elango@example.com",
-    fullname: "Nandhini Elango",
+    email: "sophia.williams@example.com",
+    fullname: "Sophia Williams",
     password: "User/123",
     profilePic: "https://randomuser.me/api/portraits/women/12.jpg",
   },
   {
-    email: "divya.murugan@example.com",
-    fullname: "Divya Murugan",
+    email: "ava.brown@example.com",
+    fullname: "Ava Brown",
     password: "User/123",
     profilePic: "https://randomuser.me/api/portraits/women/13.jpg",
   },
   {
-    email: "sowmiya.raj@example.com",
-    fullname: "Sowmiya Raj",
+    email: "isabella.davis@example.com",
+    fullname: "Isabella Davis",
     password: "User/123",
     profilePic: "https://randomuser.me/api/portraits/women/14.jpg",
   },
   {
-    email: "shruthi.ananthan@example.com",
-    fullname: "Shruthi Ananthan",
+    email: "mia.miller@example.com",
+    fullname: "Mia Miller",
     password: "User/123",
     profilePic: "https://randomuser.me/api/portraits/women/15.jpg",
   },
   {
-    email: "keerthana.selvam@example.com",
-    fullname: "Keerthana Selvam",
+    email: "charlotte.wilson@example.com",
+    fullname: "Charlotte Wilson",
     password: "User/123",
     profilePic: "https://randomuser.me/api/portraits/women/16.jpg",
   },
   {
-    email: "preethi.kumar@example.com",
-    fullname: "Preethi Kumar",
+    email: "amelia.taylor@example.com",
+    fullname: "Amelia Taylor",
     password: "User/123",
     profilePic: "https://randomuser.me/api/portraits/women/17.jpg",
   },
-
   // Male Users
   {
-    email: "arun.kumar@example.com",
-    fullname: "Arun Kumar",
+    email: "james.smith@example.com",
+    fullname: "James Smith",
     password: "User/123",
     profilePic: "https://randomuser.me/api/portraits/men/10.jpg",
   },
   {
-    email: "vignesh.natarajan@example.com",
-    fullname: "Vignesh Natarajan",
+    email: "liam.jones@example.com",
+    fullname: "Liam Jones",
     password: "User/123",
     profilePic: "https://randomuser.me/api/portraits/men/11.jpg",
   },
   {
-    email: "prakash.venkat@example.com",
-    fullname: "Prakash Venkat",
+    email: "noah.garcia@example.com",
+    fullname: "Noah Garcia",
     password: "User/123",
     profilePic: "https://randomuser.me/api/portraits/men/12.jpg",
   },
   {
-    email: "sathish.babu@example.com",
-    fullname: "Sathish Babu",
+    email: "william.martinez@example.com",
+    fullname: "William Martinez",
     password: "User/123",
     profilePic: "https://randomuser.me/api/portraits/men/13.jpg",
   },
   {
-    email: "karthik.muthu@example.com",
-    fullname: "Karthik Muthu",
+    email: "benjamin.rodriguez@example.com",
+    fullname: "Benjamin Rodriguez",
     password: "User/123",
     profilePic: "https://randomuser.me/api/portraits/men/14.jpg",
   },
   {
-    email: "dinesh.raja@example.com",
-    fullname: "Dinesh Raja",
+    email: "lucas.thompson@example.com",
+    fullname: "Lucas Thompson",
     password: "User/123",
     profilePic: "https://randomuser.me/api/portraits/men/15.jpg",
   },
   {
-    email: "saravanan.perum@example.com",
-    fullname: "Saravanan Perumal",
+    email: "oliver.white@example.com",
+    fullname: "Oliver White",
     password: "User/123",
     profilePic: "https://randomuser.me/api/portraits/men/16.jpg",
   },
@@ -108,7 +107,6 @@ const hashPassword = async (password) => {
 
 export const seedDatabase = async () => {
   try {
-    await connectDb();
     const existingUsers = await User.countDocuments();
 
     if (existingUsers <= 5) {
