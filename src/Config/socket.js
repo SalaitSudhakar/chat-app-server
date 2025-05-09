@@ -1,7 +1,7 @@
 import { Server } from "socket.io";
 import http from "http";
 import express from "express";
-import dotenv  from 'dotenv';
+import dotenv from "dotenv";
 
 dotenv.config();
 
@@ -25,12 +25,19 @@ export function getReceiverSocketId(userId) {
 const userSocketMap = {}; // {userId: socketId}
 
 io.on("connection", (socket) => {
-
   const userId = socket.handshake.query.userId;
-  if (userId) userSocketMap[userId] = socket.id;
+
+  if (userId) {
+    userSocketMap[userId] = socket.id;
+  }
 
   // io.emit() is used to send events to all the connected clients
   io.emit("getOnlineUsers", Object.keys(userSocketMap));
+
+  // Handle socket errors
+  socket.on("error", (error) => {
+    console.error(`Socket error for user ${userId}:`, error);
+  });
 
   socket.on("disconnect", () => {
     delete userSocketMap[userId];
