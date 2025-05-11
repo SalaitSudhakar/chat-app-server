@@ -5,10 +5,8 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-// Create the express app (dont create this again in server.js)
+// Create the express app (don't create this again in server.js)
 const app = express();
-
-// Create node server and give express app as value to use socket
 const server = http.createServer(app);
 
 const io = new Server(server, {
@@ -17,31 +15,38 @@ const io = new Server(server, {
   },
 });
 
+// Used to store online users
+const userSocketMap = {}; // {userId: socketId}
+
 export function getReceiverSocketId(userId) {
   return userSocketMap[userId];
 }
-
-// used to store online users
-const userSocketMap = {}; // {userId: socketId}
 
 io.on("connection", (socket) => {
   const userId = socket.handshake.query.userId;
 
   if (userId) {
     userSocketMap[userId] = socket.id;
+
+    socket.emit("getOnlineUsers", Object.keys(userSocketMap));
+
+    socket.broadcast.emit("userJoined", userId);
+  } else {
+    console.warn("[Server] No userId provided in handshake query");
   }
 
-  // io.emit() is used to send events to all the connected clients
-  io.emit("getOnlineUsers", Object.keys(userSocketMap));
-
-  // Handle socket errors
   socket.on("error", (error) => {
-    console.error(`Socket error for user ${userId}:`, error);
+    console.error(`[Server] Socket error:`, error);
   });
 
   socket.on("disconnect", () => {
-    delete userSocketMap[userId];
-    io.emit("getOnlineUsers", Object.keys(userSocketMap));
+    if (userId) {
+      delete userSocketMap[userId];
+
+      socket.broadcast.emit("userLeft", userId);
+
+      io.emit("getOnlineUsers", Object.keys(userSocketMap));
+    }
   });
 });
 
