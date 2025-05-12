@@ -1,6 +1,7 @@
 import { getReceiverSocketId, io } from "../Config/socket.js";
 import { errorHandler } from "../Utils/errorHandler.js";
 import Message from "./../Models/messageModel.js";
+import mongoose from "mongoose";
 
 export const getMessages = async (req, res, next) => {
   try {
@@ -18,6 +19,8 @@ export const getMessages = async (req, res, next) => {
         { senderId: myId, receiverId: userToChatId },
         { senderId: userToChatId, receiverId: myId },
       ],
+
+      deletedFor: { $ne: myId },
     });
 
     res
@@ -32,6 +35,8 @@ export const sendMessage = async (req, res, next) => {
   try {
     const senderId = req.user._id;
     const receiverId = req.params.id;
+
+    if (!receiverId) return next(errorHandler(400, "Receiver Id required"));
     const { text } = req.body;
 
     if (!text && !req.file) {
@@ -67,6 +72,36 @@ export const sendMessage = async (req, res, next) => {
       success: true,
       newMessage,
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const clearChat = async (req, res, next) => {
+  const secondPersonId = req.params.id;
+  const { _id: myId } = req.user;
+
+  if (!secondPersonId || !mongoose.Types.ObjectId.isValid(secondPersonId)) {
+    return next(errorHandler(400, "Invalid user ID in params"));
+  }
+
+  if (!secondPersonId)
+    return next(errorHandler(400, " User Id required from params "));
+
+  try {
+    const messages = await Message.updateMany(
+      {
+        $or: [
+          { senderId: secondPersonId, receiverId: myId },
+          { senderId: myId, receiverId: secondPersonId },
+        ],
+      },
+      { $addToSet: { deletedFor: myId } } //Prevents duplicate
+    );
+
+    if (!messages) return next(errorHandler(404, "No messages Found"));
+
+    res.status(200).json({ message: "Chat Cleared" });
   } catch (error) {
     next(error);
   }
