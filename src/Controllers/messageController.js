@@ -89,7 +89,8 @@ export const clearChat = async (req, res, next) => {
     return next(errorHandler(400, " User Id required from params "));
 
   try {
-    const messages = await Message.updateMany(
+    // Step 1: Mark messages as deleted for current user
+    await Message.updateMany(
       {
         $or: [
           { senderId: secondPersonId, receiverId: myId },
@@ -99,7 +100,14 @@ export const clearChat = async (req, res, next) => {
       { $addToSet: { deletedFor: myId } } //Prevents duplicate
     );
 
-    if (!messages) return next(errorHandler(404, "No messages Found"));
+    // Step 2: Delete messages where both users have deleted
+    await Message.deleteMany({
+      $or: [
+        { senderId: secondPersonId, receiverId: myId },
+        { senderId: myId, receiverId: secondPersonId },
+      ],
+      deletedFor: { $all: [myId, secondPersonId] },
+    });
 
     res.status(200).json({ message: "Chat Cleared" });
   } catch (error) {
