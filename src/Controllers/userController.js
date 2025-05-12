@@ -31,6 +31,8 @@ export const updateProfile = async (req, res, next) => {
   try {
     const userId = req.user._id;
 
+    const currentUserEmail = req.user.email;
+
     const updateData = {};
 
     /* Fullname */
@@ -52,13 +54,18 @@ export const updateProfile = async (req, res, next) => {
     if (req.body.email) {
       const email = req.body.email;
 
-      const isEmailExist = await User.findOne({ email }).select("-password");
+      if (currentUserEmail !== email) {
+        const isEmailExist = await User.findOne({ email }).select("-password");
 
-      if (isEmailExist) return next(errorHandler(400, "Email Already Exists. Please provide alternate email"))
+        if (isEmailExist)
+          return next(
+            errorHandler(400, "Email Already Exists. Use alternative email")
+          );
 
-      //  Validate email
-      if (!validator.isEmail(email)) {
-        return next(errorHandler(400, "Invalid email format"));
+        //  Validate email
+        if (!validator.isEmail(email)) {
+          return next(errorHandler(400, "Invalid email format"));
+        }
       }
 
       /* Add to update data object */
@@ -87,7 +94,7 @@ export const updateProfile = async (req, res, next) => {
       }
       /* Add to update data object */
       updateData.password = password;
-    } 
+    }
 
     const updateUser = await User.findByIdAndUpdate(
       userId,
