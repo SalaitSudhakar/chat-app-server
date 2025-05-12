@@ -1,3 +1,4 @@
+import bcrypt from "bcryptjs";
 import User from "../Models/userModel.js";
 import { errorHandler } from "../Utils/errorHandler.js";
 import validator from "validator";
@@ -93,7 +94,7 @@ export const updateProfile = async (req, res, next) => {
         );
       }
       /* Add to update data object */
-      updateData.password = password;
+      updateData.password = await bcrypt.hash(password, 10);
     }
 
     const updateUser = await User.findByIdAndUpdate(
