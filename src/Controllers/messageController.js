@@ -161,55 +161,102 @@ export const deleteMessageForMe = async (req, res, next) => {
 
 /* Add Emoji Reaction */
 export const addReaction = async (req, res, next) => {
-  const messageId = req.params.id; // get message id from params
-  const { emoji } = req.body; // Get emoji from req.body
-  const { _id: userId } = req.user; // Get user id from authmiddleware
+  const messageId = req.params.id;
+  const { emoji } = req.body;
+  const { _id: userId } = req.user;
 
-  /* Validate emoji */
-  if (!emoji) return next(errorHandler(400, "Emoji required"));
+  // Validate emoji
+  if (!emoji) return next(errorHandler(400, "Emoji is required"));
 
-  const isEmoji = /^\p{Emoji}$/u.test(emoji);
+  const isEmoji = /^\p{Extended_Pictographic}$/u.test(emoji);
 
-  if (!isEmoji) return next(errorHandler(400, "Invalid Emoji or not an emoji and only one emoji allowed"));
+  if (!isEmoji) {
+    return next(
+      errorHandler(400, "Invalid emoji. Only one valid emoji is allowed")
+    );
+  }
 
-  /* Validate MessageId */
+  // Validate messageId
   if (!messageId || !mongoose.Types.ObjectId.isValid(messageId)) {
-    return next(errorHandler(400, "Invalid Message ID from params"));
+    return next(errorHandler(400, "Invalid Message ID"));
   }
 
   try {
-    /* Fetch message using id */
     const message = await Message.findById(messageId).select("-deletedFor");
 
-    /* check there is no message with this id */
-    if (!message) return next(errorHandler(404, "Message is not found"));
+    if (!message) {
+      return next(errorHandler(404, "Message not found"));
+    }
 
-    /* Check if the user is authorized to react (either sender or receiver of the message) */
+    // Check authorization
     if (
-      message.senderId.toString() !== userId.toString() &&
-      message.receiverId.toString() !== userId.toString()
-    )
+      !message.senderId.equals(userId) &&
+      !message.receiverId.equals(userId)
+    ) {
       return next(
-        errorHandler(400, "You are not authorized to react to this message")
+        errorHandler(403, "You are not authorized to react to this message")
       );
+    }
 
-    /* Find the index of the reaction of current user, if they already exists */
-    const existingReactionIndex = message.emojiReactions.findIndex(
-      (reaction) => reaction.userId.toString() === userId.toString()
+    // Check if user already reacted
+    const existingReactionIndex = message.emojiReactions.findIndex((reaction) =>
+      reaction.userId.equals(userId)
     );
 
-    /* Update reaction (emoji), if user already reacted or push new emoji */
     if (existingReactionIndex !== -1) {
+      // Update existing emoji
       message.emojiReactions[existingReactionIndex].emoji = emoji;
     } else {
+      // Add new reaction
       message.emojiReactions.push({ userId, emoji });
     }
 
-    await message.save(); //save the changes
+    await message.save();
 
     res.status(200).json({
       success: true,
-      message: "Reaction Updated successfully",
+      message: "Reaction updated successfully",
+      messageData: message,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/* Delete Emoji Reaction */
+export const deleteReaction = async (req, res, next) => {
+  const messageId = req.params.id;
+  const { _id: userId } = req.user;
+
+  if (!messageId || !mongoose.Types.ObjectId.isValid(messageId)) {
+    return next(errorHandler(400, "Invalid Message ID"));
+  }
+
+  try {
+    const message = await Message.findById(messageId).select("-deletedFor");
+
+    if (!message) {
+      return next(errorHandler(404, "Message not found"));
+    }
+
+    const reactionExists = message.emojiReactions.some(
+      (reaction) => reaction.userId.toString() === userId.toString()
+    );
+
+    if (!reactionExists) {
+      return next(errorHandler(400, "You haven't reacted to this message yet"));
+    }
+
+    // This will remove the emojiReaction for that userId
+    message.emojiReactions = message.emojiReactions.filter(
+      (reaction) => reaction.userId.toString() !== userId.toString()
+    );
+
+    await message.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Reaction removed successfully",
       messageData: message,
     });
   } catch (error) {
