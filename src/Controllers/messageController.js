@@ -21,7 +21,7 @@ export const getMessages = async (req, res, next) => {
       ],
 
       deletedFor: { $ne: myId },
-    });
+    }).select("-deletedFor");
 
     res
       .status(200)
@@ -77,6 +77,7 @@ export const sendMessage = async (req, res, next) => {
   }
 };
 
+/* clear chat */
 export const clearChat = async (req, res, next) => {
   const secondPersonId = req.params.id;
   const { _id: myId } = req.user;
@@ -110,6 +111,49 @@ export const clearChat = async (req, res, next) => {
     });
 
     res.status(200).json({ message: "Chat Cleared" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/* Delete for me */
+export const deleteMessageForMe = async (req, res, next) => {
+  const messageId = req.params.id;
+  const { _id: myId } = req.user;
+
+  if (!messageId || !mongoose.Types.ObjectId.isValid(messageId)) {
+    return next(errorHandler(400, "Invalid Message ID from params"));
+  }
+
+  try {
+    // Proper filtering: Find the message only if not already deleted for this user
+    const message = await Message.findOne({
+      _id: messageId,
+      deletedFor: { $ne: myId },
+    });
+
+    if (!message) {
+      return next(errorHandler(404, "Message not found"));
+    }
+
+    const otherPersonId = message.senderId.equals(myId)
+      ? message.receiverId
+      : message.senderId;
+
+    // Mark message as deleted for current user
+    await Message.findByIdAndUpdate(messageId, {
+      $addToSet: { deletedFor: myId },
+    });
+
+    // Delete message if both users have deleted
+    if (
+      message.deletedFor?.includes(otherPersonId.toString()) ||
+      message.deletedFor?.includes(otherPersonId) // extra safety
+    ) {
+      await Message.findByIdAndDelete(messageId);
+    }
+
+    res.status(200).json({ message: "Message Deleted successfully" });
   } catch (error) {
     next(error);
   }
