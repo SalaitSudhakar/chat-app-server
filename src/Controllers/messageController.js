@@ -158,3 +158,61 @@ export const deleteMessageForMe = async (req, res, next) => {
     next(error);
   }
 };
+
+/* Add Emoji Reaction */
+export const addReaction = async (req, res, next) => {
+  const messageId = req.params.id; // get message id from params
+  const { emoji } = req.body; // Get emoji from req.body
+  const { _id: userId } = req.user; // Get user id from authmiddleware
+
+  /* Validate emoji */
+  if (!emoji) return next(errorHandler(400, "Emoji required"));
+
+  const isEmoji = /^\p{Emoji}$/u.test(emoji);
+
+  if (!isEmoji) return next(errorHandler(400, "Invalid Emoji or not an emoji and only one emoji allowed"));
+
+  /* Validate MessageId */
+  if (!messageId || !mongoose.Types.ObjectId.isValid(messageId)) {
+    return next(errorHandler(400, "Invalid Message ID from params"));
+  }
+
+  try {
+    /* Fetch message using id */
+    const message = await Message.findById(messageId).select("-deletedFor");
+
+    /* check there is no message with this id */
+    if (!message) return next(errorHandler(404, "Message is not found"));
+
+    /* Check if the user is authorized to react (either sender or receiver of the message) */
+    if (
+      message.senderId.toString() !== userId.toString() &&
+      message.receiverId.toString() !== userId.toString()
+    )
+      return next(
+        errorHandler(400, "You are not authorized to react to this message")
+      );
+
+    /* Find the index of the reaction of current user, if they already exists */
+    const existingReactionIndex = message.emojiReactions.findIndex(
+      (reaction) => reaction.userId.toString() === userId.toString()
+    );
+
+    /* Update reaction (emoji), if user already reacted or push new emoji */
+    if (existingReactionIndex !== -1) {
+      message.emojiReactions[existingReactionIndex].emoji = emoji;
+    } else {
+      message.emojiReactions.push({ userId, emoji });
+    }
+
+    await message.save(); //save the changes
+
+    res.status(200).json({
+      success: true,
+      message: "Reaction Updated successfully",
+      messageData: message,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

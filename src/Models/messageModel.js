@@ -18,10 +18,24 @@ const messageSchema = mongoose.Schema(
     image: {
       type: String,
     },
-    deletedFor: [{
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-    }]
+    deletedFor: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    emojiReactions: [
+      {
+        _id: false,
+        userId: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "user",
+        },
+        emoji: {
+          type: String,
+        },
+      },
+    ],
   },
   { timestamps: true }
 );
