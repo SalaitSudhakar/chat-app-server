@@ -165,13 +165,10 @@ export const addReaction = async (req, res, next) => {
   const { emoji } = req.body;
   const { _id: userId, fullname } = req.user;
 
-  console.log(emoji)
   // Validate emoji
   if (!emoji) return next(errorHandler(400, "Emoji is required"));
 
   const isEmojiValid = /^\p{Extended_Pictographic}$/u.test(emoji);
-
-  console.log("isEmoji: ", isEmojiValid)
 
   if (!isEmojiValid) {
     return next(
@@ -247,7 +244,12 @@ export const deleteReaction = async (req, res, next) => {
     );
 
     if (!reactionExists) {
-      return next(errorHandler(400, "You haven't reacted to this message. or you are not authorized to delete it"));
+      return next(
+        errorHandler(
+          400,
+          "You haven't reacted to this message. or you are not authorized to delete it"
+        )
+      );
     }
 
     // This will remove the emojiReaction for that userId
