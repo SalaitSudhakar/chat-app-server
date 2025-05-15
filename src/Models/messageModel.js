@@ -31,6 +31,9 @@ const messageSchema = mongoose.Schema(
           type: mongoose.Schema.Types.ObjectId,
           ref: "user",
         },
+        fullname: {
+          type: String,
+        },
         emoji: {
           type: String,
         },
