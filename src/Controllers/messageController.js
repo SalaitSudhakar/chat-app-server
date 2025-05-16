@@ -64,6 +64,7 @@ export const sendMessage = async (req, res, next) => {
 
     /* Socket */
     const receiverSocketId = getReceiverSocketId(receiverId);
+
     if (receiverSocketId) {
       io.to(receiverSocketId).emit("newMessage", newMessage);
     }
@@ -160,6 +161,7 @@ export const deleteMessageForMe = async (req, res, next) => {
 };
 
 /* Add Emoji Reaction */
+// Fixed addReaction function
 export const addReaction = async (req, res, next) => {
   const messageId = req.params.id;
   const { emoji } = req.body;
@@ -221,18 +223,16 @@ export const addReaction = async (req, res, next) => {
     const receiverSocketId = getReceiverSocketId(receiverId);
     const senderSocketId = getReceiverSocketId(userId);
 
-    // Emit to both sender and receiver
-    if (receiverSocketId) {
+    // Fixed comparison: use === for string comparison or avoid toString() and use equals() directly
+    if (receiverSocketId && !receiverId.equals(userId)) {
       io.to(receiverSocketId).emit("reactionUpdated", {
-        messageId,
-        emojiReactions: message.emojiReactions,
+        updatedMessage: message,
       });
     }
 
     if (senderSocketId && senderSocketId !== receiverSocketId) {
       io.to(senderSocketId).emit("reactionUpdated", {
-        messageId,
-        emojiReactions: message.emojiReactions,
+        updatedMessage: message,
       });
     }
 
@@ -246,7 +246,7 @@ export const addReaction = async (req, res, next) => {
   }
 };
 
-/* Delete Emoji Reaction */
+// Fixed deleteReaction function
 export const deleteReaction = async (req, res, next) => {
   const messageId = req.params.id;
   const { _id: userId } = req.user;
@@ -290,17 +290,16 @@ export const deleteReaction = async (req, res, next) => {
     const receiverSocketId = getReceiverSocketId(receiverId);
     const senderSocketId = getReceiverSocketId(userId);
 
+    // Proper socket emissions
     if (receiverSocketId) {
       io.to(receiverSocketId).emit("reactionRemoved", {
-        messageId,
-        emojiReactions: message.emojiReactions,
+        updatedMessage: message,
       });
     }
 
     if (senderSocketId && senderSocketId !== receiverSocketId) {
       io.to(senderSocketId).emit("reactionRemoved", {
-        messageId,
-        emojiReactions: message.emojiReactions,
+        updatedMessage: message,
       });
     }
 
