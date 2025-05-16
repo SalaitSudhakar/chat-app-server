@@ -213,6 +213,29 @@ export const addReaction = async (req, res, next) => {
 
     await message.save();
 
+    // Notify both users (sender and receiver)
+    const receiverId = message.senderId.equals(userId)
+      ? message.receiverId
+      : message.senderId;
+
+    const receiverSocketId = getReceiverSocketId(receiverId);
+    const senderSocketId = getReceiverSocketId(userId);
+
+    // Emit to both sender and receiver
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("reactionUpdated", {
+        messageId,
+        emojiReactions: message.emojiReactions,
+      });
+    }
+
+    if (senderSocketId && senderSocketId !== receiverSocketId) {
+      io.to(senderSocketId).emit("reactionUpdated", {
+        messageId,
+        emojiReactions: message.emojiReactions,
+      });
+    }
+
     res.status(200).json({
       success: true,
       message: "Reaction updated successfully",
@@ -258,6 +281,28 @@ export const deleteReaction = async (req, res, next) => {
     );
 
     await message.save();
+
+    // Notify both users (sender and receiver)
+    const receiverId = message.senderId.equals(userId)
+      ? message.receiverId
+      : message.senderId;
+
+    const receiverSocketId = getReceiverSocketId(receiverId);
+    const senderSocketId = getReceiverSocketId(userId);
+
+    if (receiverSocketId) {
+      io.to(receiverSocketId).emit("reactionRemoved", {
+        messageId,
+        emojiReactions: message.emojiReactions,
+      });
+    }
+
+    if (senderSocketId && senderSocketId !== receiverSocketId) {
+      io.to(senderSocketId).emit("reactionRemoved", {
+        messageId,
+        emojiReactions: message.emojiReactions,
+      });
+    }
 
     res.status(200).json({
       success: true,
